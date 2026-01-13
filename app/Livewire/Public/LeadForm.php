@@ -55,5 +55,8 @@ class LeadForm extends Component
 
         $this->reference_number = 'SH-' . str_pad($lead->id, 6, '0', STR_PAD_LEFT);
         $this->formSubmitted = true;
+
+        // REDIRECT TO CONFIRMATION INSTEAD OF SUCCESS
+        return redirect()->to("/confirm/{$lead->id}");
     }
 }

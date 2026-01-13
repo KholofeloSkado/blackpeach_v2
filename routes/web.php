@@ -14,3 +14,14 @@ Route::get('/contact', function () {
 Route::get('/pricing', function () {
     return view('pricing');
 })->name('public.pricing');
+
+
+// ✅ FIXED: Confirmation page (Blade + @livewire)
+Route::get('/confirm/{lead_id}', function ($lead_id) {
+    return view('confirm', compact('lead_id'));
+})->name('public.confirm');
+
+Route::get('/thankyou/{lead_id}', function ($lead_id) {
+    return view('thankyou', compact('lead_id'));
+})->name('public.thankyou');
+

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Contact - ServiceHub Pro</title>
+    <title>Contact - Blackpeach Consulting</title>
     <script src="https://unpkg.com/livewire@3/dist/livewire.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>

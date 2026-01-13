@@ -40,13 +40,12 @@ class LeadForm extends Component
         
         $total = $packages[$this->package] + $extrasCost;
 
-        // LIVE DATABASE SAVE
         $lead = \App\Models\Lead::create([
             'name' => $this->name,
             'phone' => $this->phone,
             'email' => $this->email ?? null,
-            'business_name' => $this->business_name,
-            'current_website' => $this->current_website,
+            'business_name' => $this->business_name ?? null,
+            'current_website' => $this->current_website ?? null,
             'package_selected' => $this->package,
             'extras_json' => $this->extras,
             'total_cost' => $total,
@@ -57,5 +56,4 @@ class LeadForm extends Component
         $this->reference_number = 'SH-' . str_pad($lead->id, 6, '0', STR_PAD_LEFT);
         $this->formSubmitted = true;
     }
-
 }

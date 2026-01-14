@@ -18,20 +18,20 @@ use App\Http\Controllers\ContactController;
 |--------------------------------------------------------------------------
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
 
-Route::get('/contact', function () {
-    return view('contact');
-})->name('public.contact');
+Route::view('/', 'pages.home')->name('home');
+Route::view('/approach', 'pages.approach')->name('approach');
+Route::view('/systems', 'pages.systems')->name('systems');
+Route::view('/how-it-works', 'pages.how-it-works')->name('how-it-works');
+Route::view('/why-blackpeach', 'pages.why')->name('why');
 
+Route::view('/contact', 'pages.contact')->name('contact');
 Route::post('/contact', [ContactController::class, 'store'])
     ->name('public.contact.store');
 
-Route::get('/pricing', function () {
-    return view('pricing');
-})->name('public.pricing');
+Route::view('/privacy', 'pages.privacy')->name('privacy');
+Route::view('/terms', 'pages.terms')->name('terms');
+
 
 /*
 |--------------------------------------------------------------------------

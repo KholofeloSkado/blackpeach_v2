@@ -1,111 +1,87 @@
-<div class="bg-white rounded-2xl shadow-sm ring-1 ring-black/5 p-8">
-    <div class="mb-8">
-        <h1 class="text-3xl font-semibold tracking-tight text-neutral-900">Contact</h1>
-        <p class="mt-2 text-neutral-600">
-            Share your details. We’ll respond within 24 hours.
-        </p>
+<div class="space-y-8">
+    {{-- Honeypot --}}
+    <input type="text" wire:model.defer="website" class="hidden" tabindex="-1" autocomplete="off">
+
+    <div>
+        <h3 class="text-2xl font-semibold text-bp-black">Contact</h3>
+        <p class="mt-1 text-sm text-bp-gray-500">Share your details. We’ll respond within 24 hours.</p>
     </div>
 
-    <form wire:submit.prevent="submit" class="space-y-6">
-        {{-- Honeypot (hidden) --}}
-        <div class="hidden">
-            <label>Website</label>
-            <input type="text" wire:model="website" tabindex="-1" autocomplete="off">
-        </div>
-
-        <div class="grid md:grid-cols-2 gap-6">
+    <form wire:submit.prevent="submit" class="space-y-8">
+        {{-- CONTACT DETAILS --}}
+        <div class="grid md:grid-cols-2 gap-5">
             <div>
-                <label class="block text-sm font-medium text-neutral-700 mb-2">Full name *</label>
-                <input
-                    type="text"
-                    wire:model.defer="name"
-                    autocomplete="name"
-                    class="w-full px-4 py-3 border border-neutral-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-neutral-900/20"
-                    required
-                >
-                @error('name') <div class="mt-2 text-sm text-red-600">{{ $message }}</div> @enderror
+                <label class="block text-sm font-medium text-bp-gray-700 mb-2">
+                    Full name <span class="text-bp-red">*</span>
+                </label>
+                <input type="text" wire:model.defer="name" required
+                       class="w-full rounded-lg border border-bp-gray-200 px-4 py-3 bp-focus"
+                       autocomplete="name">
+                @error('name') <p class="mt-1 text-xs text-bp-red">{{ $message }}</p> @enderror
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-neutral-700 mb-2">Email (optional)</label>
-                <input
-                    type="email"
-                    wire:model.defer="email"
-                    autocomplete="email"
-                    class="w-full px-4 py-3 border border-neutral-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-neutral-900/20"
-                >
-                @error('email') <div class="mt-2 text-sm text-red-600">{{ $message }}</div> @enderror
+                <label class="block text-sm font-medium text-bp-gray-700 mb-2">
+                    Email <span class="text-bp-red">*</span>
+                </label>
+                <input type="email" wire:model.defer="email" required
+                       class="w-full rounded-lg border border-bp-gray-200 px-4 py-3 bp-focus"
+                       autocomplete="email" placeholder="you@company.com">
+                @error('email') <p class="mt-1 text-xs text-bp-red">{{ $message }}</p> @enderror
             </div>
         </div>
 
-        <div>
-            <label class="block text-sm font-medium text-neutral-700 mb-2">Phone / WhatsApp *</label>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                    <select
-                        wire:model.defer="phone_country"
-                        class="w-full px-4 py-3 border border-neutral-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-neutral-900/20"
-                    >
+        <div class="grid md:grid-cols-2 gap-5">
+            <div>
+                <label class="block text-sm font-medium text-bp-gray-700 mb-2">
+                    Phone / WhatsApp <span class="text-bp-red">*</span>
+                </label>
+
+                <div class="grid grid-cols-3 gap-3">
+                    <select wire:model.defer="phone_country"
+                            class="col-span-1 rounded-lg border border-bp-gray-200 px-3 py-3 bp-focus">
                         @foreach($countries as $code => $label)
                             <option value="{{ $code }}">{{ $label }}</option>
                         @endforeach
                     </select>
-                    @error('phone_country') <div class="mt-2 text-sm text-red-600">{{ $message }}</div> @enderror
+
+                    <input type="tel" wire:model.defer="phone_national" required
+                           class="col-span-2 rounded-lg border border-bp-gray-200 px-4 py-3 bp-focus"
+                           inputmode="tel" placeholder="e.g. 83 123 4567">
                 </div>
 
-                <div class="md:col-span-2">
-                    <input
-                        type="tel"
-                        wire:model.defer="phone_national"
-                        inputmode="numeric"
-                        autocomplete="tel"
-                        placeholder="e.g. 83 123 4567"
-                        class="w-full px-4 py-3 border border-neutral-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-neutral-900/20"
-                        required
-                    >
-                    @error('phone_national') <div class="mt-2 text-sm text-red-600">{{ $message }}</div> @enderror
-                    <p class="mt-2 text-xs text-neutral-500">
-                        We’ll format your number automatically.
-                    </p>
-                </div>
-            </div>
-        </div>
+                <p class="mt-2 text-xs text-bp-gray-400">We’ll format your number automatically.</p>
 
-        <div class="grid md:grid-cols-2 gap-6">
-            <div>
-                <label class="block text-sm font-medium text-neutral-700 mb-2">Business name (optional)</label>
-                <input
-                    type="text"
-                    wire:model.defer="business_name"
-                    autocomplete="organization"
-                    class="w-full px-4 py-3 border border-neutral-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-neutral-900/20"
-                >
-                @error('business_name') <div class="mt-2 text-sm text-red-600">{{ $message }}</div> @enderror
+                @error('phone_country') <p class="mt-1 text-xs text-bp-red">{{ $message }}</p> @enderror
+                @error('phone_national') <p class="mt-1 text-xs text-bp-red">{{ $message }}</p> @enderror
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-neutral-700 mb-2">Current website (optional)</label>
-                <input
-                    type="url"
-                    wire:model.defer="current_website"
-                    placeholder="https://"
-                    class="w-full px-4 py-3 border border-neutral-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-neutral-900/20"
-                >
-                @error('current_website') <div class="mt-2 text-sm text-red-600">{{ $message }}</div> @enderror
+                <label class="block text-sm font-medium text-bp-gray-700 mb-2">Business name</label>
+                <input type="text" wire:model.defer="business_name"
+                       class="w-full rounded-lg border border-bp-gray-200 px-4 py-3 bp-focus"
+                       autocomplete="organization">
+                @error('business_name') <p class="mt-1 text-xs text-bp-red">{{ $message }}</p> @enderror
             </div>
         </div>
 
-        <button
-            type="submit"
-            class="w-full rounded-xl bg-neutral-900 text-white font-semibold py-4 hover:bg-neutral-800 transition disabled:opacity-60"
-            wire:loading.attr="disabled"
-        >
-            <span wire:loading.remove>Get my custom quote</span>
-            <span wire:loading>Submitting…</span>
+        <div class="grid md:grid-cols-2 gap-5">
+            <div class="md:col-span-2">
+                <label class="block text-sm font-medium text-bp-gray-700 mb-2">Message (optional)</label>
+                <textarea wire:model.defer="message" rows="3"
+                          class="w-full rounded-lg border border-bp-gray-200 px-4 py-3 bp-focus"
+                          placeholder="One sentence about what you need"></textarea>
+                @error('message') <p class="mt-1 text-xs text-bp-red">{{ $message }}</p> @enderror
+            </div>
+        </div>
+
+        <button type="submit"
+                class="w-full rounded-lg bg-bp-black hover:bg-bp-gray-900 text-white font-semibold py-3 transition">
+            Continue →
         </button>
 
-        <p class="text-xs text-neutral-500">
-            By submitting, you agree to be contacted about your enquiry.
+        <p class="text-xs text-bp-gray-400 leading-relaxed">
+            By submitting, you agree we may contact you by email/WhatsApp regarding your request.
         </p>
     </form>
 </div>

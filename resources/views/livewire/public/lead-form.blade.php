@@ -1,46 +1,111 @@
-<div class="max-w-2xl mx-auto p-8 bg-white rounded-xl shadow-lg">
-    @if($formSubmitted)
-        <div class="text-center p-12">
-            <div class="w-24 h-24 bg-green-100 rounded-full mx-auto mb-8 flex items-center justify-center">
-                <svg class="w-12 h-12 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                </svg>
-            </div>
-            <h2 class="text-3xl font-bold text-gray-900 mb-4">Thank You!</h2>
-            <p class="text-xl text-gray-600 mb-8">Your details have been received.</p>
-            <div class="bg-gray-50 p-6 rounded-lg mb-8">
-                <h3 class="font-semibold text-gray-900 mb-2">Reference Number</h3>
-                <div class="text-2xl font-mono font-bold text-blue-600 tracking-wide">
-                    {{ $reference_number }}
-                </div>
-            </div>
-            <a href="/" class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-semibold">
-                Return Home
-            </a>
+<div class="bg-white rounded-2xl shadow-sm ring-1 ring-black/5 p-8">
+    <div class="mb-8">
+        <h1 class="text-3xl font-semibold tracking-tight text-neutral-900">Contact</h1>
+        <p class="mt-2 text-neutral-600">
+            Share your details. We’ll respond within 24 hours.
+        </p>
+    </div>
+
+    <form wire:submit.prevent="submit" class="space-y-6">
+        {{-- Honeypot (hidden) --}}
+        <div class="hidden">
+            <label>Website</label>
+            <input type="text" wire:model="website" tabindex="-1" autocomplete="off">
         </div>
-    @else
-        <form wire:submit="submit" class="space-y-6">
-            <h1 class="text-3xl font-bold text-gray-900 mb-2">Get Your Free Quote</h1>
-            
-            <div class="grid md:grid-cols-2 gap-6">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Full Name *</label>
-                    <input type="text" wire:model="name" class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500" required>
-                    @error('name') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Phone *</label>
-                    <input type="tel" wire:model="phone" class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500" required>
-                    @error('phone') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
-                </div>
+
+        <div class="grid md:grid-cols-2 gap-6">
+            <div>
+                <label class="block text-sm font-medium text-neutral-700 mb-2">Full name *</label>
+                <input
+                    type="text"
+                    wire:model.defer="name"
+                    autocomplete="name"
+                    class="w-full px-4 py-3 border border-neutral-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-neutral-900/20"
+                    required
+                >
+                @error('name') <div class="mt-2 text-sm text-red-600">{{ $message }}</div> @enderror
             </div>
 
-            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-8 rounded-lg text-lg">
-                📋 Get My Custom Quote
-            </button>
-        </form>
-    @endif
-</div>
+            <div>
+                <label class="block text-sm font-medium text-neutral-700 mb-2">Email (optional)</label>
+                <input
+                    type="email"
+                    wire:model.defer="email"
+                    autocomplete="email"
+                    class="w-full px-4 py-3 border border-neutral-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-neutral-900/20"
+                >
+                @error('email') <div class="mt-2 text-sm text-red-600">{{ $message }}</div> @enderror
+            </div>
+        </div>
 
-<script src="https://unpkg.com/livewire@3/dist/livewire.js"></script>
-<script src="https://cdn.tailwindcss.com"></script>
+        <div>
+            <label class="block text-sm font-medium text-neutral-700 mb-2">Phone / WhatsApp *</label>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <select
+                        wire:model.defer="phone_country"
+                        class="w-full px-4 py-3 border border-neutral-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-neutral-900/20"
+                    >
+                        @foreach($countries as $code => $label)
+                            <option value="{{ $code }}">{{ $label }}</option>
+                        @endforeach
+                    </select>
+                    @error('phone_country') <div class="mt-2 text-sm text-red-600">{{ $message }}</div> @enderror
+                </div>
+
+                <div class="md:col-span-2">
+                    <input
+                        type="tel"
+                        wire:model.defer="phone_national"
+                        inputmode="numeric"
+                        autocomplete="tel"
+                        placeholder="e.g. 83 123 4567"
+                        class="w-full px-4 py-3 border border-neutral-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-neutral-900/20"
+                        required
+                    >
+                    @error('phone_national') <div class="mt-2 text-sm text-red-600">{{ $message }}</div> @enderror
+                    <p class="mt-2 text-xs text-neutral-500">
+                        We’ll format your number automatically.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-6">
+            <div>
+                <label class="block text-sm font-medium text-neutral-700 mb-2">Business name (optional)</label>
+                <input
+                    type="text"
+                    wire:model.defer="business_name"
+                    autocomplete="organization"
+                    class="w-full px-4 py-3 border border-neutral-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-neutral-900/20"
+                >
+                @error('business_name') <div class="mt-2 text-sm text-red-600">{{ $message }}</div> @enderror
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-neutral-700 mb-2">Current website (optional)</label>
+                <input
+                    type="url"
+                    wire:model.defer="current_website"
+                    placeholder="https://"
+                    class="w-full px-4 py-3 border border-neutral-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-neutral-900/20"
+                >
+                @error('current_website') <div class="mt-2 text-sm text-red-600">{{ $message }}</div> @enderror
+            </div>
+        </div>
+
+        <button
+            type="submit"
+            class="w-full rounded-xl bg-neutral-900 text-white font-semibold py-4 hover:bg-neutral-800 transition disabled:opacity-60"
+            wire:loading.attr="disabled"
+        >
+            <span wire:loading.remove>Get my custom quote</span>
+            <span wire:loading>Submitting…</span>
+        </button>
+
+        <p class="text-xs text-neutral-500">
+            By submitting, you agree to be contacted about your enquiry.
+        </p>
+    </form>
+</div>

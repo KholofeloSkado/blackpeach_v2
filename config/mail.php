@@ -113,4 +113,8 @@ return [
         'name' => env('MAIL_FROM_NAME', 'Website'),
     ],
 
+    'notify_address' => env('NINA_NOTIFY_EMAIL', env('MAIL_FROM_ADDRESS')),
+    'notify_name' => env('NINA_NOTIFY_NAME', env('MAIL_FROM_NAME', 'Blackpeach')),
+
+
 ];

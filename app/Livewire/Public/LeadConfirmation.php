@@ -3,119 +3,144 @@
 namespace App\Livewire\Public;
 
 use Livewire\Component;
-use App\Services\RequirementsDocumentService;
 use App\Models\Lead;
-use Illuminate\Support\Facades\Log;
+use App\Models\ProjectIntake;
+use App\Mail\IntakeCompletedMail;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Validation\ValidationException;
 
 class LeadConfirmation extends Component
 {
-    public int $lead_id;
+    public string $token;
 
-    public ?Lead $lead = null;
+    public Lead $lead;
+    public ProjectIntake $intake;
 
-    public string $package = 'business_plus';
-    public array $extras = ['dns' => false, 'hosting' => false, 'seo_profile' => true];
-    public float|int $total = 6780;
-    public bool $loading = false;
+    // Intake fields (match schema exactly)
+    public bool $needs_professional_email_setup = false;
+    public ?int $email_accounts_needed = null;
 
-    public function mount(int $lead_id): void
+    public ?bool $is_decision_maker = null;
+    public ?string $operating_status = null; // yes|pre-launch|no
+    public ?bool $has_paying_customers = null;
+
+    public ?string $budget_range = null;      // under_5k|5_8k|8_15k|15k_plus
+    public ?string $payment_readiness = null; // allocated|owner_funded|website_must_generate_money
+    public ?string $primary_goal = null;      // credibility|leads|bookings|ecommerce|not_sure
+
+    public function mount(string $token): void
     {
-        $this->lead_id = $lead_id;
-        $this->loadLead();
-    }
+        $this->token = $token;
 
-    public function loadLead(): void
-    {
-        $this->lead = Lead::findOrFail($this->lead_id);
-        $this->package = $this->lead->package_selected ?? 'business_plus';
-        $this->extras = $this->lead->extras_json ?? ['dns' => false, 'hosting' => false, 'seo_profile' => true];
-        $this->calculateTotal();
-    }
+        $lead = Lead::where('public_token', $token)->first();
 
-    public function updatedPackage(): void
-    {
-        $this->calculateTotal();
-    }
-
-    public function updatedExtras(): void
-    {
-        $this->calculateTotal();
-    }
-
-    public function calculateTotal(): void
-    {
-        $packages = ['business_plus' => 6780, 'executive_pro' => 13990];
-        $base = $packages[$this->package] ?? 6780;
-
-        $extras = 0;
-        if (!empty($this->extras['dns'])) $extras += 80;
-        if (!empty($this->extras['hosting'])) $extras += 1200;
-        if (!empty($this->extras['seo_profile'])) $extras += 250;
-
-        $this->total = $base + $extras;
-    }
-
-    public function confirmRequirements(RequirementsDocumentService $service)
-    {
-        Log::info('🔥 confirmRequirements START');
-        $this->loading = true;
-
-        try {
-            Log::info('Loading lead: ' . $this->lead_id);
-            $lead = Lead::findOrFail($this->lead_id);
-
-            Log::info('Updating lead with package: ' . $this->package);
-
-            $packages = ['business_plus' => 6780, 'executive_pro' => 13990];
-
-            $extrasCost =
-                (!empty($this->extras['dns']) ? 80 : 0) +
-                (!empty($this->extras['hosting']) ? 1200 : 0) +
-                (!empty($this->extras['seo_profile']) ? 250 : 0);
-
-            $total = ($packages[$this->package] ?? 6780) + $extrasCost;
-
-            $lead->update([
-                'package_selected' => $this->package,
-                'extras_json'      => $this->extras,
-                'total_cost'       => $total,
-                'status'           => 'confirmed',
+        if (! $lead) {
+            throw ValidationException::withMessages([
+                'token' => 'This link is invalid or expired.',
             ]);
-
-            Log::info('Generating PDF...');
-            $filename = $service->sendToLead($lead);
-            Log::info('PDF generated: ' . $filename);
-
-            $this->loading = false;
-
-            // ✅ FIX: your route is now /thankyou (no ID in URL)
-            Log::info('✅ Redirecting to route public.thankyou (stateless). Internal lead id: ' . $lead->id);
-
-            return $this->redirectRoute('public.thankyou', navigate: true);
-
-        } catch (\Throwable $e) {
-            $this->loading = false;
-
-            Log::error('❌ ERROR: ' . $e->getMessage());
-            Log::error('❌ TRACE: ' . $e->getTraceAsString());
-
-            throw $e; // keep this for debugging while building
         }
+
+        $this->lead = $lead;
+
+        // Ensure ONE intake row exists
+        $this->intake = ProjectIntake::firstOrCreate(['lead_id' => $lead->id]);
+
+        // Pre-fill if returning to page
+        $this->needs_professional_email_setup = (bool) $this->intake->needs_professional_email_setup;
+        $this->email_accounts_needed = $this->intake->email_accounts_needed;
+
+        $this->is_decision_maker = $this->intake->is_decision_maker;
+        $this->operating_status = $this->intake->operating_status;
+        $this->has_paying_customers = $this->intake->has_paying_customers;
+
+        $this->budget_range = $this->intake->budget_range;
+        $this->payment_readiness = $this->intake->payment_readiness;
+        $this->primary_goal = $this->intake->primary_goal;
+    }
+
+    protected function rules(): array
+    {
+        return [
+            'needs_professional_email_setup' => 'boolean',
+            'email_accounts_needed' => 'nullable|integer|min:1|max:50|required_if:needs_professional_email_setup,true',
+
+            'is_decision_maker' => 'required|boolean',
+            'operating_status' => 'required|string|in:yes,pre-launch,no',
+            'has_paying_customers' => 'required|boolean',
+
+            'budget_range' => 'required|string|in:under_5k,5_8k,8_15k,15k_plus',
+            'payment_readiness' => 'required|string|in:allocated,owner_funded,website_must_generate_money',
+            'primary_goal' => 'required|string|in:credibility,leads,bookings,ecommerce,not_sure',
+        ];
+    }
+
+    public function submit()
+    {
+        $validated = $this->validate();
+
+        // Save intake answers
+        $this->intake->update([
+            'needs_professional_email_setup' => (bool) ($validated['needs_professional_email_setup'] ?? false),
+            'email_accounts_needed' => $validated['email_accounts_needed'] ?? null,
+
+            'is_decision_maker' => (bool) $validated['is_decision_maker'],
+            'operating_status' => $validated['operating_status'],
+            'has_paying_customers' => (bool) $validated['has_paying_customers'],
+
+            'budget_range' => $validated['budget_range'],
+            'payment_readiness' => $validated['payment_readiness'],
+            'primary_goal' => $validated['primary_goal'],
+        ]);
+
+        // Mark lead as intake completed (still no scoring here)
+        $this->lead->update([
+            'status' => 'intake_completed',
+        ]);
+
+        // ✅ Email client + notify Nina (admin) — no duplicates, no crashes
+        try {
+            $leadEmail  = $this->lead->email;
+            $adminEmail = config('mail.notify_address');
+
+            // Client email
+            if (!empty($leadEmail)) {
+                Mail::to($leadEmail)->send(new IntakeCompletedMail($this->lead, $this->intake, false));
+            }
+
+            // Admin email (Nina) — only if present and not same as client
+            if (!empty($adminEmail) && $adminEmail !== $leadEmail) {
+                Mail::to($adminEmail)->send(new IntakeCompletedMail($this->lead, $this->intake, true));
+            }
+        } catch (\Throwable $e) {
+            logger()->error('IntakeCompletedMail failed', [
+                'lead_id' => $this->lead->id ?? null,
+                'lead_email' => $this->lead->email ?? null,
+                'admin_email' => config('mail.notify_address'),
+                'error' => $e->getMessage(),
+            ]);
+        }
+
+        // Use Livewire redirect helper (avoids return type mismatch issues)
+        return $this->redirectRoute('public.thankyou');
     }
 
     public function render()
     {
-        $packages = [
-            'business_plus'  => 'Business Plus - R6,780',
-            'executive_pro'  => 'Executive Pro - R13,990',
+        $budgetRanges = [
+            'under_5k' => 'Under R5k',
+            '5_8k' => 'R5–8k',
+            '8_15k' => 'R8–15k',
+            '15k_plus' => 'R15k+',
         ];
 
-        return view('livewire.public.lead-confirmation', compact('packages'));
-    }
+        $goals = [
+            'credibility' => 'Credibility',
+            'leads' => 'Leads',
+            'bookings' => 'Bookings',
+            'ecommerce' => 'Ecommerce',
+            'not_sure' => 'Not sure',
+        ];
 
-    public function testButton(): void
-    {
-        session()->flash('message', '🔥 LIVEWIRE WORKS! Button clicked.');
-        $this->dispatch('alert', message: 'Test successful!');
+        return view('livewire.public.lead-confirmation', compact('budgetRanges', 'goals'));
     }
 }

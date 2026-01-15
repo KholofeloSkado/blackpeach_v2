@@ -28,10 +28,10 @@ class Lead extends Model
 
     protected $casts = [
         'extras_json' => 'array',
-        'total_cost' => 'decimal:2',
-        'created_at' => 'datetime',
-        'updated_at' => 'datetime',
+        'flags' => 'array',
+        'lead_score' => 'integer',
     ];
+
 
 
     protected static function booted()

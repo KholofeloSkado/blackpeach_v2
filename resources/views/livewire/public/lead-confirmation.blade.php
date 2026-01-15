@@ -1,71 +1,178 @@
-<div class="max-w-4xl mx-auto p-8">
-    <div class="bg-white rounded-2xl shadow-2xl p-12">
-        <!-- Header -->
-        <div class="text-center mb-12">
-            <h1 class="text-4xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent mb-4">
-                Confirm Your Package
-            </h1>
-            <p class="text-xl text-gray-600">Review and confirm your selection</p>
+{{-- resources/views/livewire/public/lead-confirmation.blade.php --}}
+<div class="relative space-y-8">
+    {{-- Loading overlay (must be INSIDE the single root element) --}}
+    <div wire:loading.flex wire:target="submit"
+         class="absolute inset-0 z-20 items-center justify-center bg-white/80 backdrop-blur-sm rounded-2xl">
+        <div class="flex flex-col items-center gap-3">
+            {{-- Spinner --}}
+            <svg class="h-8 w-8 animate-spin text-bp-red" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+            </svg>
+
+            <div class="text-sm font-medium text-bp-black">Submitting your details…</div>
+            <div class="text-xs text-bp-gray-500">This takes a few seconds.</div>
+        </div>
+    </div>
+
+    <div class="space-y-8">
+        {{-- Honeypot --}}
+        <input type="text" wire:model.defer="website" class="hidden" tabindex="-1" autocomplete="off">
+
+        <div>
+            <h3 class="text-2xl font-semibold text-bp-black">Project Details</h3>
+            <p class="mt-1 text-sm text-bp-gray-500">Complete your intake so we can respond accurately.</p>
         </div>
 
-        <!-- Package Selection -->
-        <div class="grid md:grid-cols-2 gap-12 mb-12">
-            <div>
-                <label class="block text-xl font-semibold text-gray-900 mb-4">Package</label>
-                <select wire:model.live="package" class="w-full p-4 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-100 focus:border-blue-300 text-lg">
-                    @foreach($packages as $key => $label)
-                        <option value="{{ $key }}">{{ $label }}</option>
-                    @endforeach
-                </select>
+        {{-- Lead Summary Card --}}
+        <div class="rounded-xl border border-bp-gray-200 bg-bp-gray-50 p-5">
+            <div class="text-sm text-bp-gray-600">You're submitting as</div>
+            <div class="mt-1 text-base font-semibold text-bp-black">
+                {{ $this->lead->name }} • {{ $this->lead->email }}
             </div>
+            <div class="mt-1 text-sm text-bp-gray-500">
+                {{ $this->lead->phone }}
+            </div>
+        </div>
 
-            <!-- Extras -->
+        <form wire:submit.prevent="submit" class="space-y-8">
+            {{-- BUSINESS READINESS --}}
             <div>
-                <label class="block text-xl font-semibold text-gray-900 mb-6">Add-ons</label>
-                <div class="space-y-4">
-                    <label class="flex items-center p-4 border-2 border-dashed border-orange-200 rounded-xl hover:border-orange-300 transition">
-                        <input type="checkbox" wire:model.live="extras.seo_profile" class="w-6 h-6 rounded">
-                        <span class="ml-4 text-lg">
-                            <span class="font-semibold text-orange-600">SEO Profile</span> 
-                            <span class="text-gray-600">R250</span> 
-                            <span class="text-sm text-orange-800 font-medium">(Essential)</span>
-                        </span>
-                    </label>
-                    <label class="flex items-center p-4 border-2 border-dashed border-gray-200 rounded-xl hover:border-gray-300 transition">
-                        <input type="checkbox" wire:model.live="extras.dns" class="w-6 h-6 rounded">
-                        <span class="ml-4 text-lg">DNS Registration <span class="text-gray-600">R80</span></span>
-                    </label>
-                    <label class="flex items-center p-4 border-2 border-dashed border-gray-200 rounded-xl hover:border-gray-300 transition">
-                        <input type="checkbox" wire:model.live="extras.hosting" class="w-6 h-6 rounded">
-                        <span class="ml-4 text-lg">12 Months Hosting <span class="text-gray-600">R1,200</span></span>
-                    </label>
+                <h4 class="text-lg font-semibold text-bp-black mb-4">Business readiness</h4>
+                
+                <div class="space-y-5">
+                    <div>
+                        <label class="block text-sm font-medium text-bp-gray-700 mb-2">
+                            Are you the final decision maker? <span class="text-bp-red">*</span>
+                        </label>
+                        <select wire:model.defer="is_decision_maker" required
+                                class="w-full rounded-lg border border-bp-gray-200 px-4 py-3 bp-focus">
+                            <option value="">Select…</option>
+                            <option value="1">Yes</option>
+                            <option value="0">No</option>
+                        </select>
+                        @error('is_decision_maker') <p class="mt-1 text-xs text-bp-red">{{ $message }}</p> @enderror
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-bp-gray-700 mb-2">
+                            Is the business currently operating? <span class="text-bp-red">*</span>
+                        </label>
+                        <select wire:model.defer="operating_status" required
+                                class="w-full rounded-lg border border-bp-gray-200 px-4 py-3 bp-focus">
+                            <option value="">Select…</option>
+                            <option value="yes">Yes</option>
+                            <option value="pre-launch">Pre-launch</option>
+                            <option value="no">No</option>
+                        </select>
+                        @error('operating_status') <p class="mt-1 text-xs text-bp-red">{{ $message }}</p> @enderror
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-bp-gray-700 mb-2">
+                            Do you currently have paying customers? <span class="text-bp-red">*</span>
+                        </label>
+                        <select wire:model.defer="has_paying_customers" required
+                                class="w-full rounded-lg border border-bp-gray-200 px-4 py-3 bp-focus">
+                            <option value="">Select…</option>
+                            <option value="1">Yes</option>
+                            <option value="0">No</option>
+                        </select>
+                        @error('has_paying_customers') <p class="mt-1 text-xs text-bp-red">{{ $message }}</p> @enderror
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Total -->
-        <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border-4 border-blue-100 rounded-2xl p-8 mb-12">
-            <div class="flex justify-between items-center text-2xl">
-                <span class="font-semibold text-gray-800">Total Investment:</span>
-                <span class="font-bold text-3xl text-blue-800 font-mono">R{{ number_format($total, 0) }}</span>
+            {{-- BUDGET & PAYMENT --}}
+            <div>
+                <h4 class="text-lg font-semibold text-bp-black mb-4">Budget & payment</h4>
+                
+                <div class="space-y-5">
+                    <div>
+                        <label class="block text-sm font-medium text-bp-gray-700 mb-2">
+                            What is your allocated budget range? <span class="text-bp-red">*</span>
+                        </label>
+                        <select wire:model.defer="budget_range" required
+                                class="w-full rounded-lg border border-bp-gray-200 px-4 py-3 bp-focus">
+                            <option value="">Select…</option>
+                            @foreach($budgetRanges as $val => $label)
+                                <option value="{{ $val }}">{{ $label }}</option>
+                            @endforeach
+                        </select>
+                        @error('budget_range') <p class="mt-1 text-xs text-bp-red">{{ $message }}</p> @enderror
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-bp-gray-700 mb-2">
+                            How will you pay for this project? <span class="text-bp-red">*</span>
+                        </label>
+                        <select wire:model.defer="payment_readiness" required
+                                class="w-full rounded-lg border border-bp-gray-200 px-4 py-3 bp-focus">
+                            <option value="">Select…</option>
+                            <option value="allocated">Budget already allocated</option>
+                            <option value="owner_funded">Owner funded</option>
+                            <option value="website_must_generate_money">We need the website to generate money first</option>
+                        </select>
+                        <p class="mt-2 text-xs text-bp-gray-400">This helps us recommend the right next step.</p>
+                        @error('payment_readiness') <p class="mt-1 text-xs text-bp-red">{{ $message }}</p> @enderror
+                    </div>
+                </div>
             </div>
-        </div>
 
-        <!-- SINGLE CONFIRM BUTTON -->
-        <div class="text-center">
-            <button wire:click="confirmRequirements" 
+            {{-- WEBSITE GOAL --}}
+            <div>
+                <h4 class="text-lg font-semibold text-bp-black mb-4">Website goal</h4>
+                
+                <div>
+                    <label class="block text-sm font-medium text-bp-gray-700 mb-2">
+                        Primary goal for the website <span class="text-bp-red">*</span>
+                    </label>
+                    <select wire:model.defer="primary_goal" required
+                            class="w-full rounded-lg border border-bp-gray-200 px-4 py-3 bp-focus">
+                        <option value="">Select…</option>
+                        @foreach($goals as $val => $label)
+                            <option value="{{ $val }}">{{ $label }}</option>
+                        @endforeach
+                    </select>
+                    @error('primary_goal') <p class="mt-1 text-xs text-bp-red">{{ $message }}</p> @enderror
+                </div>
+            </div>
+
+            {{-- EMAIL SETUP (OPTIONAL) --}}
+            <div>
+                <h4 class="text-lg font-semibold text-bp-black mb-4">Email setup (optional)</h4>
+                
+                <div class="space-y-5">
+                    <label class="flex items-start gap-3 text-sm text-bp-gray-700">
+                        <input type="checkbox" wire:model.defer="needs_professional_email_setup"
+                               class="mt-1 rounded border-bp-gray-300 text-bp-red focus:ring-bp-red">
+                        <span>I need professional email accounts (e.g. you@mycompany.co.za)</span>
+                    </label>
+
+                    <div>
+                        <label class="block text-sm font-medium text-bp-gray-700 mb-2">
+                            How many email accounts do you need?
+                        </label>
+                        <input type="number" min="1" max="50" wire:model.defer="email_accounts_needed"
+                               class="w-full rounded-lg border border-bp-gray-200 px-4 py-3 bp-focus"
+                               placeholder="e.g. 3">
+                        @error('email_accounts_needed') <p class="mt-1 text-xs text-bp-red">{{ $message }}</p> @enderror
+                    </div>
+                </div>
+            </div>
+
+            {{-- SUBMIT BUTTON --}}
+            <button type="submit"
                     wire:loading.attr="disabled"
-                    class="inline-flex items-center px-12 py-6 bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-700 hover:to-blue-900 text-white text-xl font-bold rounded-2xl shadow-2xl transform hover:-translate-y-1 transition-all duration-200 disabled:opacity-50">
-                @if($loading)
-                    <svg class="animate-spin -ml-1 mr-3 h-7 w-7" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Generating Requirements...
-                @else
-                    ✅ Confirm & Send Requirements Document
-                @endif
+                    wire:target="submit"
+                    class="w-full rounded-lg bg-bp-black hover:bg-bp-gray-900 text-white font-semibold py-3 transition disabled:opacity-60 disabled:cursor-not-allowed">
+                <span wire:loading.remove wire:target="submit">Confirm & Submit →</span>
+                <span wire:loading.inline wire:target="submit">Processing…</span>
             </button>
-        </div>
+
+            <p class="text-xs text-bp-gray-400 leading-relaxed">
+                By submitting, you agree we may contact you about your request.
+            </p>
+        </form>
     </div>
 </div>

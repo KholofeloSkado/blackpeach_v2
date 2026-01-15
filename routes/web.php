@@ -9,7 +9,6 @@ use Illuminate\Support\Facades\Hash;
 use App\Models\User;
 use App\Models\Lead;
 use App\Mail\OtpMail;
-
 use App\Http\Controllers\ContactController;
 
 /*
@@ -17,7 +16,6 @@ use App\Http\Controllers\ContactController;
 | Public pages
 |--------------------------------------------------------------------------
 */
-
 
 Route::view('/', 'pages.home')->name('home');
 Route::view('/approach', 'pages.approach')->name('approach');
@@ -32,24 +30,24 @@ Route::post('/contact', [ContactController::class, 'store'])
 Route::view('/privacy', 'pages.privacy')->name('privacy');
 Route::view('/terms', 'pages.terms')->name('terms');
 
-
 /*
 |--------------------------------------------------------------------------
-| Public Lead Flow (Secure: token-based)
+| Public Lead Flow (token-based, no closures, no DB in routes)
 |--------------------------------------------------------------------------
 */
+
+//Route::view('/confirm/{token}', 'pages.confirm')->name('public.confirm');
 
 Route::get('/confirm/{token}', function (string $token) {
     $lead = Lead::where('public_token', $token)->firstOrFail();
 
-    return view('confirm', [
+    return view('pages.confirm', [
         'lead' => $lead,
     ]);
 })->name('public.confirm');
 
-Route::get('/thankyou', function () {
-    return view('thankyou');
-})->name('public.thankyou');
+
+Route::view('/thankyou', 'pages.thankyou')->name('public.thankyou');
 
 /*
 |--------------------------------------------------------------------------
@@ -133,7 +131,7 @@ Route::post('/login/otp', function (Request $request) {
 
 /*
 |--------------------------------------------------------------------------
-| RESEND OTP (Production)
+| RESEND OTP
 |--------------------------------------------------------------------------
 */
 
@@ -160,7 +158,7 @@ Route::post('/login/otp/resend', function () {
 
 /*
 |--------------------------------------------------------------------------
-| Logout Route
+| Logout
 |--------------------------------------------------------------------------
 */
 
@@ -174,7 +172,7 @@ Route::post('/logout', function (Request $request) {
 
 /*
 |--------------------------------------------------------------------------
-| Admin area (protected) - ALL CLIENT DATA CENTRALIZED
+| Admin area (protected)
 |--------------------------------------------------------------------------
 */
 
@@ -186,7 +184,6 @@ Route::middleware(['auth', 'admin'])
             ->name('dashboard');
 
         Route::resource('leads', \App\Http\Controllers\Admin\LeadsController::class);
-
         Route::resource('projects', \App\Http\Controllers\Admin\ProjectsController::class);
         Route::resource('documents', \App\Http\Controllers\Admin\DocumentsController::class);
         Route::resource('statements', \App\Http\Controllers\Admin\StatementsController::class);

@@ -5,6 +5,9 @@ namespace App\Livewire\Public;
 use Livewire\Component;
 use App\Models\Lead;
 use App\Models\ProjectIntake;
+use App\Mail\LeadReceivedMail;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Validation\ValidationException;
 
@@ -76,6 +79,7 @@ class LeadForm extends Component
         }
 
         // Create Lead (contact-only)
+        // NOTE: leads table requires extras_json + total_cost (no defaults)
         $lead = Lead::create([
             'name'            => trim($validated['name']),
             'phone'           => $phoneE164,
@@ -84,12 +88,39 @@ class LeadForm extends Component
             'current_website' => $validated['current_website'] ? trim($validated['current_website']) : null,
             'message'         => $validated['message'] ? trim($validated['message']) : null,
 
+            // Required DB columns (keep minimal values for now)
+            'extras_json'     => [],
+            'total_cost'      => 0,
+
             'status'          => 'new',
             'source'          => 'website',
         ]);
 
         // Ensure one empty intake row exists (Step 2 will fill it)
         ProjectIntake::firstOrCreate(['lead_id' => $lead->id]);
+
+        // ✅ Email client + notify Nina (admin) — do not block the funnel if mail fails
+        try {
+            $leadEmail  = $lead->email;
+            $adminEmail = config('mail.notify_address');
+
+            // Client email
+            if (!empty($leadEmail)) {
+                Mail::to($leadEmail)->send(new LeadReceivedMail($lead, false));
+            }
+
+            // Admin email (Nina) — only if configured and not same as lead
+            if (!empty($adminEmail) && $adminEmail !== $leadEmail) {
+                Mail::to($adminEmail)->send(new LeadReceivedMail($lead, true));
+            }
+        } catch (\Throwable $e) {
+            Log::error('LeadReceivedMail failed', [
+                'lead_id' => $lead->id ?? null,
+                'lead_email' => $lead->email ?? null,
+                'admin_email' => config('mail.notify_address'),
+                'error' => $e->getMessage(),
+            ]);
+        }
 
         // Redirect to confirm/intake step (token-based)
         return $this->redirectRoute('public.confirm', ['token' => $lead->public_token]);

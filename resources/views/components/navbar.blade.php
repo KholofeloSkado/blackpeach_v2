@@ -1,12 +1,12 @@
 @php
   $links = [
+    ['label' => 'Home', 'route' => 'home', 'is_home' => true],
     ['label' => 'Our Approach', 'route' => 'approach'],
-    ['label' => 'Systems', 'route' => 'systems'],
     ['label' => 'How It Works', 'route' => 'how-it-works'],
     ['label' => 'Why Blackpeach', 'route' => 'why'],
+    ['label' => 'Contact', 'route' => 'contact'],
   ];
 
-  // Helper to detect active route (works best if you use named routes)
   $isActive = function (string $routeName) {
     return request()->routeIs($routeName) || request()->routeIs($routeName . '.*');
   };
@@ -16,7 +16,7 @@
   <nav class="mx-auto flex max-w-7xl items-center justify-between px-4 py-4">
     {{-- Brand --}}
     <a href="{{ route('home') }}" class="flex items-center gap-2">
-      <img src="{{ asset('images/logo-mark.png') }}" alt="Blackpeach" class="h-7 w-7">
+      <img src="{{ asset('images/1.png') }}" alt="Blackpeach" class="h-12 w-12">
       <span class="text-lg font-semibold tracking-tight">Blackpeach</span>
     </a>
 
@@ -25,12 +25,18 @@
       @foreach ($links as $link)
         <a
           href="{{ route($link['route']) }}"
-          class="text-sm font-medium transition
+          class="flex items-center gap-1 text-sm font-medium transition
             {{ $isActive($link['route'])
-              ? 'text-slate-900'
+              ? 'text-slate-900 overline decoration-[#B10000] decoration-2'
               : 'text-slate-500 hover:text-slate-900' }}"
         >
-          {{ $link['label'] }}
+          @if(isset($link['is_home']) && $link['is_home'])
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+            </svg>
+          @else
+            {{ $link['label'] }}
+          @endif
         </a>
       @endforeach
     </div>
@@ -38,11 +44,11 @@
     {{-- Desktop CTA --}}
     <div class="hidden md:block">
       <a
-        href="{{ route('systems') }}"
+        href="{{ route('contact') }}"
         class="inline-flex items-center rounded-md bg-red-700 px-5 py-2.5 text-sm font-semibold text-white
                shadow-sm transition hover:bg-red-800 focus:outline-none focus:ring-2 focus:ring-red-500"
       >
-        View Systems
+        Apply for a Build Slot
       </a>
     </div>
 
@@ -55,7 +61,6 @@
                hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-red-500"
         aria-label="Open menu"
       >
-        {{-- icon --}}
         <svg x-show="!open" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
              viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -81,20 +86,23 @@
             @foreach ($links as $link)
               <a
                 href="{{ route($link['route']) }}"
-                class="rounded-md px-3 py-2 text-sm font-medium transition
+                class="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition
                   {{ $isActive($link['route'])
                     ? 'bg-slate-100 text-slate-900'
                     : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}"
               >
-                {{ $link['label'] }}
+                @if(isset($link['is_home']) && $link['is_home'])
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+                  </svg>
+                  Home
+                @else
+                  {{ $link['label'] }}
+                @endif
               </a>
             @endforeach
-
-            <a
-              href="{{ route('systems') }}"
-              class="mt-3 inline-flex items-center justify-center rounded-md bg-red-700 px-4 py-2.5 text-sm font-semibold text-white
-                     shadow-sm transition hover:bg-red-800"
-            >
+            
+            <a href="{{ route('systems') }}" class="mt-3 inline-flex items-center justify-center rounded-md bg-red-700 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-red-800">
               View Systems
             </a>
           </div>

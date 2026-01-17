@@ -42,7 +42,8 @@ Route::get('/confirm/{token}', function (string $token) {
     $lead = Lead::where('public_token', $token)->firstOrFail();
 
     return view('pages.confirm', [
-        'lead' => $lead,
+        'token' => $token,
+        'lead'  => $lead,
     ]);
 })->name('public.confirm');
 

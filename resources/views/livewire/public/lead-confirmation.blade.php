@@ -3,7 +3,7 @@
     {{-- Loading overlay (must be INSIDE the single root element) --}}
     <div wire:loading.flex wire:target="submit"
          class="absolute inset-0 z-20 items-center justify-center bg-white/80 backdrop-blur-sm rounded-2xl">
-        <div class="flex flex-col items-center gap-3">
+        <div class="flex flex-col items-center gap-3 bg-[#1e293b]">
             {{-- Spinner --}}
             <svg class="h-8 w-8 animate-spin text-bp-red" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -25,7 +25,7 @@
         </div>
 
         {{-- Lead Summary Card --}}
-        <div class="rounded-xl border border-bp-gray-200 bg-bp-gray-50 p-5">
+        <div class="rounded-xl border border-bp-gray-200 bg-bp-gray-50 p-5 bg-[#B10000] hover:bg-[#8a0000] text-white">
             <div class="text-sm text-bp-gray-600">You're submitting as</div>
             <div class="mt-1 text-base font-semibold text-bp-black">
                 {{ $this->lead->name }} • {{ $this->lead->email }}
@@ -46,7 +46,7 @@
                             Are you the final decision maker? <span class="text-bp-red">*</span>
                         </label>
                         <select wire:model.defer="is_decision_maker" required
-                                class="w-full rounded-lg border border-bp-gray-200 px-4 py-3 bp-focus">
+                                class="text-[#1e293b] w-full rounded-lg border border-bp-gray-200 px-4 py-3 bp-focus">
                             <option value="">Select…</option>
                             <option value="1">Yes</option>
                             <option value="0">No</option>
@@ -59,13 +59,13 @@
                             Is the business currently operating? <span class="text-bp-red">*</span>
                         </label>
                         <select wire:model.defer="operating_status" required
-                                class="w-full rounded-lg border border-bp-gray-200 px-4 py-3 bp-focus">
+                                class="text-[#1e293b] w-full rounded-lg border border-bp-gray-200 px-4 py-3 bp-focus">
                             <option value="">Select…</option>
                             <option value="yes">Yes</option>
                             <option value="pre-launch">Pre-launch</option>
                             <option value="no">No</option>
                         </select>
-                        @error('operating_status') <p class="mt-1 text-xs text-bp-red">{{ $message }}</p> @enderror
+                        @error('operating_status') <p class="text-[#1e293b] mt-1 text-xs text-bp-red">{{ $message }}</p> @enderror
                     </div>
 
                     <div>
@@ -73,12 +73,12 @@
                             Do you currently have paying customers? <span class="text-bp-red">*</span>
                         </label>
                         <select wire:model.defer="has_paying_customers" required
-                                class="w-full rounded-lg border border-bp-gray-200 px-4 py-3 bp-focus">
+                                class="text-[#1e293b] w-full rounded-lg border border-bp-gray-200 px-4 py-3 bp-focus">
                             <option value="">Select…</option>
                             <option value="1">Yes</option>
                             <option value="0">No</option>
                         </select>
-                        @error('has_paying_customers') <p class="mt-1 text-xs text-bp-red">{{ $message }}</p> @enderror
+                        @error('has_paying_customers') <p class="text-[#1e293b] mt-1 text-xs text-bp-red">{{ $message }}</p> @enderror
                     </div>
                 </div>
             </div>
@@ -93,13 +93,13 @@
                             What is your allocated budget range? <span class="text-bp-red">*</span>
                         </label>
                         <select wire:model.defer="budget_range" required
-                                class="w-full rounded-lg border border-bp-gray-200 px-4 py-3 bp-focus">
+                                class="text-[#1e293b] w-full rounded-lg border border-bp-gray-200 px-4 py-3 bp-focus">
                             <option value="">Select…</option>
                             @foreach($budgetRanges as $val => $label)
                                 <option value="{{ $val }}">{{ $label }}</option>
                             @endforeach
                         </select>
-                        @error('budget_range') <p class="mt-1 text-xs text-bp-red">{{ $message }}</p> @enderror
+                        @error('budget_range') <p class="text-[#1e293b] mt-1 text-xs text-bp-red">{{ $message }}</p> @enderror
                     </div>
 
                     <div>
@@ -107,14 +107,14 @@
                             How will you pay for this project? <span class="text-bp-red">*</span>
                         </label>
                         <select wire:model.defer="payment_readiness" required
-                                class="w-full rounded-lg border border-bp-gray-200 px-4 py-3 bp-focus">
+                                class="text-[#1e293b] w-full rounded-lg border border-bp-gray-200 px-4 py-3 bp-focus">
                             <option value="">Select…</option>
                             <option value="allocated">Budget already allocated</option>
                             <option value="owner_funded">Owner funded</option>
                             <option value="website_must_generate_money">We need the website to generate money first</option>
                         </select>
                         <p class="mt-2 text-xs text-bp-gray-400">This helps us recommend the right next step.</p>
-                        @error('payment_readiness') <p class="mt-1 text-xs text-bp-red">{{ $message }}</p> @enderror
+                        @error('payment_readiness') <p class="text-[#1e293b] mt-1 text-xs text-bp-red">{{ $message }}</p> @enderror
                     </div>
                 </div>
             </div>
@@ -128,13 +128,13 @@
                         Primary goal for the website <span class="text-bp-red">*</span>
                     </label>
                     <select wire:model.defer="primary_goal" required
-                            class="w-full rounded-lg border border-bp-gray-200 px-4 py-3 bp-focus">
+                            class="text-[#1e293b] w-full rounded-lg border border-bp-gray-200 px-4 py-3 bp-focus">
                         <option value="">Select…</option>
                         @foreach($goals as $val => $label)
                             <option value="{{ $val }}">{{ $label }}</option>
                         @endforeach
                     </select>
-                    @error('primary_goal') <p class="mt-1 text-xs text-bp-red">{{ $message }}</p> @enderror
+                    @error('primary_goal') <p class="text-[#1e293b] mt-1 text-xs text-bp-red">{{ $message }}</p> @enderror
                 </div>
             </div>
 
@@ -154,9 +154,9 @@
                             How many email accounts do you need?
                         </label>
                         <input type="number" min="1" max="50" wire:model.defer="email_accounts_needed"
-                               class="w-full rounded-lg border border-bp-gray-200 px-4 py-3 bp-focus"
+                               class="text-[#1e293b] w-full rounded-lg border border-bp-gray-200 px-4 py-3 bp-focus"
                                placeholder="e.g. 3">
-                        @error('email_accounts_needed') <p class="mt-1 text-xs text-bp-red">{{ $message }}</p> @enderror
+                        @error('email_accounts_needed') <p class="text-[#1e293b] mt-1 text-xs text-bp-red">{{ $message }}</p> @enderror
                     </div>
                 </div>
             </div>
@@ -165,7 +165,7 @@
             <button type="submit"
                     wire:loading.attr="disabled"
                     wire:target="submit"
-                    class="w-full rounded-lg bg-bp-black hover:bg-bp-gray-900 text-white font-semibold py-3 transition disabled:opacity-60 disabled:cursor-not-allowed">
+                    class="w-full rounded-lg bg-[#B10000] hover:bg-[#8a0000] text-white font-semibold py-3 transition disabled:opacity-60 disabled:cursor-not-allowed">
                 <span wire:loading.remove wire:target="submit">Confirm & Submit →</span>
                 <span wire:loading.inline wire:target="submit">Processing…</span>
             </button>
